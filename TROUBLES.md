@@ -15,3 +15,6 @@
 | 11 | headless では `KHR_parallel_shader_compile extension not supported` 警告と fps≈20台 | SwiftShader(CPU)描画 | 無害。fps は実機の目安にならない。見た目確認のみに使う |
 | 12 | image_generation / audio_generation が失敗 | アカウントの有料クレジット切れ | 生成系は使わない。画像は image_search(CC) / SVG / プロシージャル、音は WebAudio 合成 |
 | 13 | 同一サンドボックスに2エージェントが同居 (B と C) | エージェントが同じ sandbox に割り当てられることがある | `git worktree add .wt/<ID> -b agent-<ID>` で作業ツリー分離 (join.sh が自動) |
+| 14 | `The AudioContext was not allowed to start` 警告が大量 | ユーザー操作外 (?skip 自動開始) で AudioContext 生成 | `navigator.userActivation.isActive` を確認し、偽なら最初の pointerup で生成 |
+| 15 | shot.mjs が `viewport.width: expected integer, got NaN` | オプション `--tap` を位置引数 WxH として解釈 | 位置引数とフラグを分離して解析 (修正済) |
+| 16 | 同居サンドボックスで headless Chromium を複数同時起動すると落ちる | メモリ 1GB | `flock /tmp/nanka_chromium.lock node tools/shot.mjs ...` で排他 (B 提案) |
