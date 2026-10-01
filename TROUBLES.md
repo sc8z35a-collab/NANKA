@@ -18,3 +18,4 @@
 | 14 | `The AudioContext was not allowed to start` 警告が大量 | ユーザー操作外 (?skip 自動開始) で AudioContext 生成 | `navigator.userActivation.isActive` を確認し、偽なら最初の pointerup で生成 |
 | 15 | shot.mjs が `viewport.width: expected integer, got NaN` | オプション `--tap` を位置引数 WxH として解釈 | 位置引数とフラグを分離して解析 (修正済) |
 | 16 | 同居サンドボックスで headless Chromium を複数同時起動すると落ちる | メモリ 1GB | `flock /tmp/nanka_chromium.lock node tools/shot.mjs ...` で排他 (B 提案) |
+| 17 | `page.screenshot: Timeout 30000ms exceeded` | SwiftShader の重い WebGL 描画中で撮影フレームが取れない | screenshot の timeout を 90s に |
