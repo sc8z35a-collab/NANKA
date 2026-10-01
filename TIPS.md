@@ -1,7 +1,7 @@
 # TIPS — 細部作成のコツ（リーダーA 集約。各自の追記は tips/<ID>.md）
 
 ## 見た目（明るい・非ネオン・高品質）
-- `renderer.toneMapping = ACESFilmicToneMapping`, exposure 1.0〜1.15, `outputColorSpace = SRGBColorSpace`。テクスチャ色は `texture.colorSpace = SRGBColorSpace`。
+- `renderer.toneMapping = NeutralToneMapping` (ACES は彩度が落ちて灰色化→暗色禁止に抵触), exposure 1.0, `outputColorSpace = SRGBColorSpace`。テクスチャ色は `texture.colorSpace = SRGBColorSpace`。
 - 明るさは **HemisphereLight(空色, 草色, 0.9〜1.2) + DirectionalLight(暖白 #FFF4E0, 2.5〜3)** が基本。影は `PCFSoftShadowMap`, mapSize 4096, `shadow.radius` 低め+`normalBias 0.02`。
 - 影が黒くなりすぎたら Hemisphere を上げる。**影色が暗い＝暗い色禁止違反に見える**ので注意。
 - 遠景は `scene.fog = new Fog('#DDF1FF', near, far)` で空色に溶かす（黒フォグ禁止）。
