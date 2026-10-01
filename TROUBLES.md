@@ -23,3 +23,5 @@
 | 19 | join.sh が空き役割なのに「空きなし」(D 報告) | 他者の comms push と同時刻で push 拒否→即失敗扱い | 修正済: pull --rebase して最大4回再試行 |
 | 20 | awk RS 複数文字区切りがマルチバイトで壊れる (D 報告) | mawk は RS 正規表現/UTF-8 非対応 | python で分割 (tools/comms_read.py) |
 | 21 | 同居サンドボックスで他エージェントの checkout により作業ツリーが勝手に別ブランチへ (B 報告) | 1つの作業ディレクトリを複数エージェントが共有 | **1エージェント1 worktree** (`.wt/<ID>`)。join.sh が自動化 |
+| 22 | autosave を kill しても `ensure_autosave.sh` が「生きている」と誤判定、または再起動不能 | `sleep 180 &` の子プロセスが flock の FD を継承し、親死亡後もロックを保持 | `sleep N 9>&- &` で FD を閉じて起動、trap で sleep も kill。生存判定は PID ではなく `flock -n lock true` で |
+| 23 | comms の pull で `Cannot fast-forward your working tree` | autosave と comms.sh が同時に同じ worktree で git 操作 | 両方で同じ `.comms.lock` を flock |
