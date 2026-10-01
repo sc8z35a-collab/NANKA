@@ -1,3 +1,3 @@
-# A status (2026-10-01 10:56:56 UTC)
+# A status (2026-10-01 11:28:34 UTC)
 
-WORKING: コア完成。D 離脱のため src/fx (コンポーザ/パーティクル/鳥) と src/audio (WebAudio 合成) を実装中。
+PAUSED: コア+fx+audio+ハーネス+docs完了。B/C 統合済(途中版)。残: B の flora/landmarks/clouds/props, C の仕上げ, 最終QA
