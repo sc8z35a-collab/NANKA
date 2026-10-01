@@ -19,3 +19,7 @@
 | 15 | shot.mjs が `viewport.width: expected integer, got NaN` | オプション `--tap` を位置引数 WxH として解釈 | 位置引数とフラグを分離して解析 (修正済) |
 | 16 | 同居サンドボックスで headless Chromium を複数同時起動すると落ちる | メモリ 1GB | `flock /tmp/nanka_chromium.lock node tools/shot.mjs ...` で排他 (B 提案) |
 | 17 | `page.screenshot: Timeout 30000ms exceeded` | SwiftShader の重い WebGL 描画中で撮影フレームが取れない | screenshot の timeout を 90s に |
+| 18 | worktree (.wt/B) で動く autosave の心拍が更新されない (B 報告) | autosave が `$ROOT/.comms` 固定で `.comms_path` を見ていない | 修正済: `.comms_path` 優先。**autosave は起動時にスクリプトを読むので更新後は kill→ensure_autosave.sh で再起動** |
+| 19 | join.sh が空き役割なのに「空きなし」(D 報告) | 他者の comms push と同時刻で push 拒否→即失敗扱い | 修正済: pull --rebase して最大4回再試行 |
+| 20 | awk RS 複数文字区切りがマルチバイトで壊れる (D 報告) | mawk は RS 正規表現/UTF-8 非対応 | python で分割 (tools/comms_read.py) |
+| 21 | 同居サンドボックスで他エージェントの checkout により作業ツリーが勝手に別ブランチへ (B 報告) | 1つの作業ディレクトリを複数エージェントが共有 | **1エージェント1 worktree** (`.wt/<ID>`)。join.sh が自動化 |
