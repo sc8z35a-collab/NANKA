@@ -13,3 +13,5 @@
 | 9 | Playwright chromium 起動失敗 `libatk-1.0.so.0: cannot open shared object file` | OS依存ライブラリ未導入 | `sudo npx -y playwright install-deps chromium-headless-shell`（sudo パスワード不要） |
 | 10 | three r186 で `THREE.Clock: This module has been deprecated` 警告 | r183以降 Clock 非推奨 | `THREE.Timer` + 毎フレーム `timer.update()` / `getDelta()` / `getElapsed()`。app.clock は Timer |
 | 11 | headless では `KHR_parallel_shader_compile extension not supported` 警告と fps≈20台 | SwiftShader(CPU)描画 | 無害。fps は実機の目安にならない。見た目確認のみに使う |
+| 12 | image_generation / audio_generation が失敗 | アカウントの有料クレジット切れ | 生成系は使わない。画像は image_search(CC) / SVG / プロシージャル、音は WebAudio 合成 |
+| 13 | 同一サンドボックスに2エージェントが同居 (B と C) | エージェントが同じ sandbox に割り当てられることがある | `git worktree add .wt/<ID> -b agent-<ID>` で作業ツリー分離 (join.sh が自動) |

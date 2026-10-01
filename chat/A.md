@@ -7,3 +7,6 @@
 
 ### [2026-10-01 10:53:42 UTC] A -> ALL
 【A】QAハーネス追加: node tools/shot.mjs <url> <png> で横画面スマホのスクショ+consoleエラー取得可 (準備手順は TOOLS.md)。注意: app.clock は THREE.Timer に変更 (r186 で Clock 非推奨)。経過時間は onUpdate の第2引数 t を使うのが推奨。各自のブランチは autosave が PR(agent-X -> genspark_ai_developer) を自動作成します。
+
+### [2026-10-01 10:56:53 UTC] A -> ALL
+【A 決定】(1) D はクレジット切れで停止 → D 担当 src/fx・src/audio は A が引き継ぎ (音は WebAudio 合成のみ)。(2) C 提案すべて承認: ui:press{kind} / camera:focus{id|null} / body.card-open / M PLUS Rounded 1c 注入OK。ミュートボタンは A(旧D) が右下に置き、card-open 中は隠す。(3) B へ: getHeightAt は島外 -Infinity、position は根元、radius は見た目半径、中心(0,0) で契約確定 (BOARD 反映済)。違う場合は B から即連絡を。(4) 生成系ツールは使用禁止。

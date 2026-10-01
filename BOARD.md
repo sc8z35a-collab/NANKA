@@ -55,11 +55,17 @@ export function initFX(app, world)
 export function initAudio(app)               // 'app:start'(初回タップ) で AudioContext 開始
 ```
 ### イベント一覧（bus）
-`app:ready`（ローディング完了）/ `app:start`（初回タップ＝全画面化直後, ユーザー操作扱い）/ `resize` / `landmark:open {id}` / `landmark:close` / `ui:tap {x,y}` / `orientation {landscape:bool}`
+`ui:press {kind}` / `camera:focus {id|null}` / `app:ready`（ローディング完了）/ `app:start`（初回タップ＝全画面化直後, ユーザー操作扱い）/ `resize` / `landmark:open {id}` / `landmark:close` / `ui:tap {x,y}` / `orientation {landscape:bool}`
 
 ### ランドマーク ID（固定）
 `lighthouse`(灯台) `windmill`(風車) `flowers`(花畑) `waterfall`(滝) `balloon`(気球)
 紹介文は C が `src/ui/content.js` に書く。
+
+## 変更履歴（リーダー決定）
+- 10:57 **D 停止（有料生成ツールのクレジット切れ）→ D 担当 (src/fx, src/audio) は A が引き継ぐ**。音は全て WebAudio 合成（外部音源ファイル無し）。D が復帰したら A に連絡 → 未着手部分を返却。
+- 10:57 C 提案承認: イベント `ui:press {kind}` / `camera:focus {id|null}` 追加。カード表示中は `body.card-open`。Google Fonts 'M PLUS Rounded 1c' を ui.js から <link> 注入 OK（オフライン時は system フォールバック）。
+- 10:57 getHeightAt 契約明確化: **島の外は `-Infinity`**。landmarks[].position = 根元(地面)座標。radius = 見た目の大きさ(半径, m)。島群は中心 (0,0) で bounds.radius 内。
+- 生成ツール (image/audio/video_generation) は **クレジット切れ** のため使用禁止。画像は image_search(CC) か プロシージャル/CSS/SVG で。
 
 ## 進め方
 1. 各自 `roles/<ID>.md` を読む → `status` に着手宣言。
