@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#BFE6FF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<title>NANKA — 空にうかぶ島</title>
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/ui.css">
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+<canvas id="stage" aria-label="空にうかぶ島の3Dシーン"></canvas>
+<div id="ui-root"></div>
+
+<!-- ローディング -->
+<section id="loader" class="layer">
+  <div class="loader-card">
+    <div class="loader-logo">NANKA</div>
+    <div class="loader-sub">空にうかぶ島</div>
+    <div class="loader-bar"><i id="loader-fill"></i></div>
+    <div class="loader-label" id="loader-label">じゅんび中…</div>
+  </div>
+</section>
+
+<!-- スタート (全画面化・横向きロック・音声解禁はここでのユーザー操作内で行う) -->
+<section id="start" class="layer hidden">
+  <button id="start-btn" class="start-btn" type="button">
+    <span class="start-ico">☁</span><span>タップして はじめる</span>
+  </button>
+  <p class="start-note">全画面で ひらきます</p>
+</section>
+
+<!-- 縦向きゲート -->
+<section id="rotate" class="layer">
+  <div class="phone"><div class="phone-screen"></div></div>
+  <p>スマホを よこにしてね</p>
+</section>
+
+<noscript><p style="padding:2em">JavaScript を有効にしてください。</p></noscript>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

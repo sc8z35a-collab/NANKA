@@ -2,3 +2,8 @@ node_modules/
 .agent_id
 *.log
 .tmp/
+.comms/
+.wt/
+.comms_path
+.comms.lock
+.sandbox_uid
