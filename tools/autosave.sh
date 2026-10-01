@@ -17,7 +17,7 @@ LOGDIR="$ROOT/.tmp"; mkdir -p "$LOGDIR"
 LOG="$LOGDIR/autosave.log"
 LOCK="$LOGDIR/autosave.lock"
 PIDF="$LOGDIR/autosave.pid"
-COMMS="$ROOT/.comms"
+COMMS="$(cat "$ROOT/.comms_path" 2>/dev/null || echo "$ROOT/.comms")"   # worktree(.wt/X)は .comms_path で共有comms を指す
 BASE_BRANCH="genspark_ai_developer"
 
 log(){ echo "[$(date '+%F %T')][$AGENT] $*" >> "$LOG"; }

@@ -31,7 +31,14 @@ claim(){ # $1=ID → 0:成功
   [ -f "$C/roles/$id.claim" ] && ! grep -q "uid=$UID_" "$C/roles/$id.claim" && return 1
   mkdir -p "$C/roles"; printf 'uid=%s host=%s dir=%s\nclaimed=%s\n' "$UID_" "$(hostname)" "$ROOT" "$(date -u '+%FT%TZ')" > "$C/roles/$id.claim"
   git -C "$C" add -A && git -C "$C" commit -qm "claim role $id" --no-verify
-  if timeout 60 git -C "$C" push -q origin HEAD:comms 2>/dev/null; then return 0; fi
+  local i
+  for i in 1 2 3 4; do   # 他者の comms push と競合したら rebase して再試行 (D 報告)
+    timeout 60 git -C "$C" push -q origin HEAD:comms 2>/dev/null && return 0
+    git -C "$C" pull -q --rebase origin comms 2>/dev/null || { git -C "$C" rebase --abort; break; }
+    # rebase 後に他者が同じ役割を取っていたら負け
+    grep -q "uid=$UID_" "$C/roles/$id.claim" 2>/dev/null || return 1
+    sleep $i
+  done
   git -C "$C" fetch -q origin comms && git -C "$C" reset -q --hard origin/comms; return 1
 }
 ID=""
