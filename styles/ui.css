@@ -209,3 +209,34 @@ body.card-open .nk-toast{left:31vw}
 
 /* レイヤ順: ピン(1) < HUD(3) < ミニマップ(4) < カード(6) */
 .nk-pins{z-index:1;isolation:isolate} .nk-hud{z-index:3} .nk-minimap{z-index:4} .nk-card{z-index:6} .nk-ripple{z-index:2}
+
+/* ダブルタップ波紋 */
+.nk-ripple.big{width:90px;height:90px;margin:-45px 0 0 -45px;border-width:3px}
+/* 紙ふぶき */
+.nk-confetti{position:fixed;z-index:60;width:9px;height:12px;margin:-6px 0 0 -4px;border-radius:60% 10% 60% 10%;background:var(--c);pointer-events:none!important;
+  box-shadow:0 1px 2px rgba(60,90,120,.18);transform:scale(var(--s));animation:nk-conf var(--d) cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes nk-conf{0%{transform:translate(0,0) rotate(0) scale(var(--s));opacity:1}
+  70%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) + 40px)) rotate(var(--r)) scale(var(--s));opacity:0}}
+/* カード内スクロールの上下フェード */
+.nk-card-scroll{-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent);mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
+
+/* ===================== ともだち証 ===================== */
+.nk-cert{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:auto!important;
+  background:radial-gradient(90% 90% at 50% 50%,rgba(255,255,255,.55),rgba(232,246,255,.35));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .6s}
+.nk-cert.show{opacity:1}
+.nk-cert-card{position:relative;width:min(560px,70vw);padding:calc(var(--u)*1.6) calc(var(--u)*2) calc(var(--u)*1.4);border-radius:28px;text-align:center;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.0) 0 10px,rgba(255,236,214,.35) 10px 20px),linear-gradient(170deg,#FFFDF7,#FFF4E5);
+  box-shadow:0 0 0 6px #fff,0 0 0 9px #FFE2CF,0 24px 60px rgba(60,90,120,.25);transform:translateY(30px) scale(.9) rotate(-2deg);transition:transform .9s var(--ease-spring)}
+.nk-cert.show .nk-cert-card{transform:none}
+.nk-cert-ribbon{display:inline-flex;align-items:center;gap:.5em;padding:.45em 1.4em;border-radius:99px;background:linear-gradient(90deg,#FFB08F,#FF9F7A);color:#fff;
+  font-weight:800;font-size:calc(var(--u)*1.35);letter-spacing:.12em;box-shadow:0 6px 16px rgba(255,159,122,.35);margin-top:calc(var(--u)*-.2)}
+.nk-cert-ribbon svg{width:1.2em;height:1.2em}
+.nk-cert-text{margin-top:calc(var(--u)*.9);font-size:calc(var(--u)*1.1);line-height:1.8;font-weight:700}
+.nk-cert-stamps{display:flex;justify-content:center;gap:calc(var(--u)*.8);margin-top:calc(var(--u)*1)}
+.nk-cert-stamps span{display:flex;flex-direction:column;align-items:center;gap:.25em;width:calc(var(--u)*4.4);font-size:calc(var(--u)*.8);font-weight:800;
+  animation:nk-pop .8s var(--ease-spring) both;animation-delay:calc(.6s + var(--i)*.14s)}
+.nk-cert-stamps svg{width:calc(var(--u)*4);height:calc(var(--u)*4);padding:calc(var(--u)*.55);border-radius:50%;background:var(--t);
+  box-shadow:0 0 0 3px #fff,0 0 0 5px color-mix(in srgb,var(--c) 45%,#fff),0 4px 10px rgba(60,90,120,.18);transform:rotate(calc(var(--i)*7deg - 14deg))}
+.nk-cert-date{margin-top:calc(var(--u)*.9);font-size:calc(var(--u)*.82);color:var(--ink2);font-weight:700;letter-spacing:.1em}
+.nk-cert-ok{margin:calc(var(--u)*.9) auto 0;padding:0 1.6em;font-weight:800;font-size:calc(var(--u)*1.05);background:linear-gradient(180deg,#fff,#E9F7DF)}
+.nk-cert-ok svg{width:1.6em;height:1.6em;background:#7FC77A;border-radius:50%;padding:.2em}

@@ -73,7 +73,7 @@ export function initUI(app, world) {
     const c = info(id);
     const b = h('button', 'nk-chip', `<span class="nk-chip-ico">${icon(c.icon)}</span><span class="nk-chip-label">${c.name}</span>`);
     b.type = 'button'; b.dataset.id = id; b.style.setProperty('--c', c.color); b.style.setProperty('--t', c.tint);
-    b.addEventListener('click', () => { bus.emit('ui:press', { kind: 'chip', id }); open(id); });
+    b.addEventListener('click', () => { haptic(8); bus.emit('ui:press', { kind: 'chip', id }); open(id); });
     chips.appendChild(b);
   }
   hud.appendChild(chips);
@@ -185,8 +185,11 @@ export function initUI(app, world) {
     bus.emit('landmark:open', { id });
     if (first) {
       bus.emit('ui:discover', { id, count: state.found.size, total: ids.length });
-      if (state.found.size === ids.length) setTimeout(() => { showToast(SITE.allFound, 5200, 'big'); bus.emit('ui:complete'); }, 1600);
+      setTimeout(() => confetti(stampsEl.querySelector('.nk-stamp.pop') || stampsEl, info(id).color), 450);
+      haptic([10, 40, 18]);
+      if (state.found.size === ids.length) setTimeout(() => { showToast(SITE.allFound, 5200, 'big'); bus.emit('ui:complete'); setTimeout(showCertificate, 2600); }, 1600);
     }
+    if (!history.state?.nkCard) { try { history.pushState({ nkCard: 1 }, ''); } catch {} }
   }
   function close(silentCamera = false) {
     if (!state.open) return;
@@ -195,6 +198,7 @@ export function initUI(app, world) {
     document.body.classList.remove('card-open');
     chips.querySelectorAll('.nk-chip').forEach((b) => b.classList.remove('on'));
     rig.setShift(0);
+    if (history.state?.nkCard) { closingByCode = true; try { history.back(); } catch {} }
     if (!silentCamera) rig.flyTo({ dist: Math.min(rig.home.dist, rig.goal.dist * 1.9), phi: Math.min(rig.goal.phi, 1.0), dur: 1.4 });
     halo.hide();
     bus.emit('camera:focus', { id: null });
@@ -240,11 +244,34 @@ export function initUI(app, world) {
         if (d < rad && d < best) { best = d; hit = p.lm; }
       }
     }
-    if (hit) { bus.emit('ui:press', { kind: 'pick', id: hit.id }); open(hit.id); }
-    else if (state.open) { bus.emit('ui:press', { kind: 'close' }); close(); }
-    else ripple(x, y);
+    // 注: ui:tap は camera.js が既に発火済み (音はそれで鳴る) → ここでは ui:press を重ねない
+    const nowT = performance.now();
+    const dbl = nowT - lastTap.t < 340 && Math.hypot(x - lastTap.x, y - lastTap.y) < 40;
+    lastTap = { t: dbl ? 0 : nowT, x, y };
+    if (hit) { haptic(12); open(hit.id); }
+    else if (state.open) close();
+    else if (dbl) { // ダブルタップ: その地点へ寄る
+      const g = marchGround(ray.ray);
+      if (g) { haptic(8); rig.flyTo({ target: g, dist: Math.max(rig.cfg.minDist * 1.2, rig.goal.dist * 0.55), dur: 1.1 }); ripple(x, y, 'big'); }
+    } else ripple(x, y);
   });
-  function ripple(x, y) { const r = h('i', 'nk-ripple'); r.style.left = `${x}px`; r.style.top = `${y}px`; root.appendChild(r); setTimeout(() => r.remove(), 700); }
+  let lastTap = { t: 0, x: 0, y: 0 };
+  // 視線レイを地形 (getHeightAt) に対してレイマーチ
+  function marchGround(r) {
+    const p = new THREE.Vector3(); const maxD = rig.cfg.maxDist * 2.5; let prev = null;
+    for (let d = 0; d < maxD; d += 0.6 + d * 0.01) {
+      r.at(d, p); const gh = safeHraw(p.x, p.z);
+      if (gh !== null && p.y <= gh) { // 二分探索で詰める
+        let a = prev ?? Math.max(0, d - 1), b = d;
+        for (let i = 0; i < 8; i++) { const m = (a + b) / 2; r.at(m, p); const g2 = safeHraw(p.x, p.z); if (g2 !== null && p.y <= g2) b = m; else a = m; }
+        r.at(b, p); return p.clone();
+      }
+      prev = d;
+    }
+    return null;
+  }
+  function safeHraw(x, z) { try { const v2 = world.getHeightAt?.(x, z); return Number.isFinite(v2) ? v2 : null; } catch { return null; } }
+  function ripple(x, y, cls = '') { const r = h('i', `nk-ripple ${cls}`); r.style.left = `${x}px`; r.style.top = `${y}px`; root.appendChild(r); setTimeout(() => r.remove(), 700); }
 
   // ============ 遮蔽判定用メッシュ (重い InstancedMesh/Points は除外) ============
   let occluders = [];
@@ -343,13 +370,44 @@ export function initUI(app, world) {
   let drags = 0; bus.on('camera:interact', () => { if (++drags > 3) setTimeout(hideHint, 1500); });
   // 外部から開閉要求 (他エージェント/デバッグ)
   bus.on('ui:open', ({ id }) => open(id)); bus.on('ui:close', () => close());
-  // 戻る(Android バック)でカードを閉じる
+  // 戻る(Android バック)でカードを閉じる (open で pushState 済み)
+  let closingByCode = false;
+  window.addEventListener('popstate', () => { if (closingByCode) { closingByCode = false; return; } if (state.open) close(); });
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  // 紙ふぶき (DOM, 明るい色の花びら形)
+  function confetti(anchorEl, color) {
+    const r = anchorEl.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const cols = [color, '#FFD36E', '#FFFFFF', '#FFB3C7', '#8FB8FF', '#9ED37A'];
+    for (let i = 0; i < 26; i++) {
+      const e = h('i', 'nk-confetti'); const a = Math.random() * Math.PI * 2, v = 50 + Math.random() * 90;
+      e.style.cssText = `left:${cx}px;top:${cy}px;--dx:${Math.cos(a) * v}px;--dy:${Math.sin(a) * v * 0.7 + 30}px;--r:${(Math.random() * 720 - 360) | 0}deg;--c:${cols[i % cols.length]};--d:${0.9 + Math.random() * 0.7}s;--s:${0.6 + Math.random() * 0.8}`;
+      root.appendChild(e); setTimeout(() => e.remove(), 1800);
+    }
+  }
+  // ぜんぶ見つけたら「島のともだち証」
+  function showCertificate() {
+    if (state.open) close(true);
+    const d = new Date(); const date = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
+    const ov = h('div', 'nk-cert');
+    ov.innerHTML = `<div class="nk-cert-card"><div class="nk-cert-ribbon">${icon('sparkle')}<span>しまの ともだち しょう</span>${icon('sparkle')}</div>
+      <p class="nk-cert-text">あなたは 空にうかぶ島の<br>5つの ふしぎを ぜんぶ 見つけました。</p>
+      <div class="nk-cert-stamps">${ids.map((id, i) => `<span style="--c:${info(id).color};--t:${info(id).tint};--i:${i}">${icon(info(id).icon)}<b>${info(id).name}</b></span>`).join('')}</div>
+      <p class="nk-cert-date">${date}　NANKA しまの みんなより</p>
+      <button type="button" class="nk-btn nk-cert-ok">${icon('check')}<span>ありがとう！</span></button></div>`;
+    root.appendChild(ov); requestAnimationFrame(() => ov.classList.add('show'));
+    for (let k = 0; k < 4; k++) setTimeout(() => confetti(ov.querySelector('.nk-cert-ribbon'), ['#FF9F7A', '#8FB8FF', '#FFD36E', '#FFB3C7'][k]), 300 + k * 260);
+    const done = () => { bus.emit('ui:press', { kind: 'close' }); ov.classList.remove('show'); setTimeout(() => ov.remove(), 700); rig.goHome(); };
+    ov.querySelector('.nk-cert-ok').addEventListener('click', done);
+    ov.addEventListener('pointerdown', (e) => e.stopPropagation());
+  }
+  app.ui.certificate = showCertificate;
 
   function safeH(x, z) { try { const v2 = world.getHeightAt?.(x, z); return Number.isFinite(v2) ? v2 : 0; } catch { return 0; } }
   return app.ui;
 }
 
+function haptic(ms) { try { navigator.vibrate?.(ms); } catch {} }
 function isChildOf(o, root) { while (o) { if (o === root) return true; o = o.parent; } return false; }
 function loadFound() { try { return new Set(JSON.parse(localStorage.getItem(STORE) || '[]')); } catch { return new Set(); } }
 function saveFound(s) { try { localStorage.setItem(STORE, JSON.stringify([...s])); } catch {} }
