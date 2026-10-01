@@ -6,3 +6,4 @@ node_modules/
 .wt/
 .comms_path
 .comms.lock
+.sandbox_uid

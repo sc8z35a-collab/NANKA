@@ -19,14 +19,17 @@ if [ -f .agent_id ] && [ -n "$WANT" ] && [ "$(cat .agent_id)" != "$WANT" ]; then
   echo "以後は cd $ROOT/.wt/$WANT で作業。"; exec ".wt/$WANT/tools/join.sh" "$WANT"
 fi
 
+# サンドボックスは hostname/dir が全員同じ(sandbox.local:/home/user/webapp)なので、ランダムUIDで本人識別
+[ -f .sandbox_uid ] || python3 -c "import uuid;print(uuid.uuid4().hex[:12])" > .sandbox_uid
+UID_="$(cat .sandbox_uid)"
 C="$(cat .comms_path 2>/dev/null || echo "$ROOT/.comms")"
 if [ ! -e "$C/.git" ]; then git worktree add -q "$C" -B comms origin/comms || exit 1; fi
 git -C "$C" pull -q --rebase origin comms
 
 claim(){ # $1=ID → 0:成功
   local id="$1"
-  [ -f "$C/roles/$id.claim" ] && [ "$(sed -n 1p "$C/roles/$id.claim")" != "host=$(hostname) dir=$ROOT" ] && return 1
-  mkdir -p "$C/roles"; printf 'host=%s dir=%s\nclaimed=%s\n' "$(hostname)" "$ROOT" "$(date -u '+%FT%TZ')" > "$C/roles/$id.claim"
+  [ -f "$C/roles/$id.claim" ] && ! grep -q "uid=$UID_" "$C/roles/$id.claim" && return 1
+  mkdir -p "$C/roles"; printf 'uid=%s host=%s dir=%s\nclaimed=%s\n' "$UID_" "$(hostname)" "$ROOT" "$(date -u '+%FT%TZ')" > "$C/roles/$id.claim"
   git -C "$C" add -A && git -C "$C" commit -qm "claim role $id" --no-verify
   if timeout 60 git -C "$C" push -q origin HEAD:comms 2>/dev/null; then return 0; fi
   git -C "$C" fetch -q origin comms && git -C "$C" reset -q --hard origin/comms; return 1
