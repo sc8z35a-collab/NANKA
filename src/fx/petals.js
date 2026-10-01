@@ -3,11 +3,11 @@ import { landmark } from './util.js';
 export function createPetals({ app, world, scene, THREE }) {
   const N = app.quality === 'low' ? 200 : 600;
   // 少し反った花びら形状
-  const geo = new THREE.PlaneGeometry(0.55, 0.38, 3, 1);
+  const geo = new THREE.PlaneGeometry(0.9, 0.6, 3, 1);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) { const x = pos.getX(i); pos.setZ(i, x * x * 0.6); }
   geo.computeVertexNormals();
-  const mat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.7, metalness: 0, transparent: true, opacity: 0.95 });
+  const mat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.7, metalness: 0, transparent: true, opacity: 0.95, emissive: '#FFE6EE', emissiveIntensity: 0.35 });
   const mesh = new THREE.InstancedMesh(geo, mat, N);
   mesh.frustumCulled = false; mesh.castShadow = false;
   const palette = ['#FFC4D6', '#FFD9E4', '#FFFFFF', '#FFE8B8', '#FFB8C8', '#F8D3FF'].map((c) => new THREE.Color(c));

@@ -13,8 +13,8 @@ export function createApp(canvas) {
   });
   renderer.setPixelRatio(dpr);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMapping = THREE.NeutralToneMapping; // ACES は彩度が落ち灰色っぽくなるため Neutral (明るいパステル維持)
+  renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setClearColor('#CFEBFF', 1);

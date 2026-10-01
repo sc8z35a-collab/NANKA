@@ -54,7 +54,8 @@ function fallbackWorld() {
   app.progress('できました！', 1);
 
   // シェーダのコンパイルを先に済ませてカクつきを防ぐ
-  try { await app.renderer.compileAsync?.(app.scene, app.camera); } catch {}
+  // (環境により遅い/返らないことがあるので最大 2.5 秒で打ち切り)
+  try { await Promise.race([app.renderer.compileAsync?.(app.scene, app.camera), new Promise((r) => setTimeout(r, 2500))]); } catch {}
   await new Promise((r) => setTimeout(r, 350));
   $('loader').classList.add('hidden');
   app.bus.emit('app:ready');
