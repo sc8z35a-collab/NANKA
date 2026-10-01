@@ -54,7 +54,9 @@ export function initFX(app, world) {
   composer.setPixelRatio(app.dpr);
   composer.addPass(new RenderPass(scene, camera));
 
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.22, 0.55, 0.92);
+  // Bloom: 明るい空が丸ごと光らないよう threshold は高め (HDR 線形値 >1.0 のみ: 太陽・水しぶき・灯台の灯)
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.2, 0.4, 1.0);
+  bloom.enabled = !app.params.has('nobloom');
   composer.addPass(bloom);
 
   const tilt = new ShaderPass(TiltShiftShader);
