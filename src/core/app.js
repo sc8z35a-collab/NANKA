@@ -27,7 +27,8 @@ export function createApp(canvas) {
   camera.position.set(0, 55, 120);
   camera.lookAt(0, 8, 0);
 
-  const clock = new THREE.Clock();
+  const clock = new THREE.Timer();   // r186: Clock は非推奨。clock.getDelta()/getElapsed() を使う
+  clock.connect?.(document);          // タブ非表示中の時間を飛ばす
   const updaters = new Set();
   let renderFn = () => renderer.render(scene, camera);
   const size = { w: 1, h: 1 };
@@ -60,14 +61,13 @@ export function createApp(canvas) {
   // FPS 計測 (?fps=1 で表示)
   let frames = 0, acc = 0; app.fps = 60;
   renderer.setAnimationLoop(() => {
+    clock.update();
     const dt = Math.min(clock.getDelta(), 1 / 20);
-    const t = clock.elapsedTime;
+    const t = clock.getElapsed();
     for (const fn of updaters) { try { fn(dt, t); } catch (e) { console.error('[update]', e); updaters.delete(fn); } }
     renderFn(dt, t);
     frames++; acc += dt; if (acc >= 1) { app.fps = frames / acc; frames = 0; acc = 0; bus.emit('fps', app.fps); }
   });
 
-  // タブ非表示時はクロックを止めて復帰時のジャンプを防ぐ
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) clock.getDelta(); });
   return app;
 }
