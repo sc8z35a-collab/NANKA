@@ -77,7 +77,7 @@ function buildIsland(opts) {
   }
   for (let i = 0; i < NR; i++) for (let j = 0; j < NT; j++) {
     const a = i * cols + j, b = i * cols + ((j + 1) % NT), c = (i + 1) * cols + j, d = (i + 1) * cols + ((j + 1) % NT);
-    idx.push(a, c, b, b, c, d);
+    idx.push(a, b, c, b, d, c);
   }
   const top = new THREE.BufferGeometry();
   top.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -250,8 +250,8 @@ function buildWater(Q = 1) {
   }
   for (let i = 0; i < NRw; i++) for (let j = 0; j < NTw; j++) {
     const a = i * NTw + j, b = i * NTw + (j + 1) % NTw, c = (i + 1) * NTw + j, d = (i + 1) * NTw + (j + 1) % NTw;
-    if (keep[a] || keep[b] || keep[c]) idx.push(a, c, b);
-    if (keep[b] || keep[c] || keep[d]) idx.push(b, c, d);
+    if (keep[a] || keep[b] || keep[c]) idx.push(a, b, c);
+    if (keep[b] || keep[c] || keep[d]) idx.push(b, d, c);
   }
   // 未使用頂点を詰める
   const used = new Int32Array(pos.length / 3).fill(-1); const P = [], S = [], F = [], I = [];
