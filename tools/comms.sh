@@ -44,9 +44,7 @@ case "$cmd" in
   read)
     git -C "$C" pull -q --rebase --autostash origin comms 2>/dev/null
     n="${1:-20}"
-    # 各発言ブロックを1レコードにして時刻ソート
-    for f in "$C"/chat/*.md; do [ -f "$f" ] && awk 'BEGIN{RS="\n### ";ORS=""} NR>1||/^\[/{gsub(/^### /,""); print "### " $0 "\x1e"}' "$f"; done \
-      | tr '\x1e' '\0' | sort -z | tail -z -n "$n" | tr '\0' '\n' ;;
+    python3 "$ROOT/tools/comms_read.py" "$C/chat" "$n" ;;
   who)
     git -C "$C" pull -q --rebase --autostash origin comms 2>/dev/null
     for f in "$C"/heartbeat/*.txt; do [ -f "$f" ] || continue
