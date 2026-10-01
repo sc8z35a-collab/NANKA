@@ -22,7 +22,7 @@ page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
 await page.goto(url, { waitUntil: 'load', timeout: 60000 });
 await page.waitForTimeout(Number(waitMs));
 for (let i = 0; i < rest.length; i++) if (rest[i] === '--tap') { const [x, y] = rest[++i].split(',').map(Number); await page.touchscreen.tap(x, y); await page.waitForTimeout(2500); }
-await page.screenshot({ path: out });
+await page.screenshot({ path: out, timeout: 90000 }); // SwiftShader 描画中は撮影が遅い
 const fps = await page.evaluate(() => window.NANKA?.fps?.toFixed?.(1)).catch(() => null);
 console.log(JSON.stringify({ out, fps, errors: logs.slice(0, 30) }, null, 1));
 await browser.close();
