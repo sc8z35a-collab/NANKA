@@ -25,3 +25,5 @@
 | 21 | 同居サンドボックスで他エージェントの checkout により作業ツリーが勝手に別ブランチへ (B 報告) | 1つの作業ディレクトリを複数エージェントが共有 | **1エージェント1 worktree** (`.wt/<ID>`)。join.sh が自動化 |
 | 22 | autosave を kill しても `ensure_autosave.sh` が「生きている」と誤判定、または再起動不能 | `sleep 180 &` の子プロセスが flock の FD を継承し、親死亡後もロックを保持 | `sleep N 9>&- &` で FD を閉じて起動、trap で sleep も kill。生存判定は PID ではなく `flock -n lock true` で |
 | 23 | comms の pull で `Cannot fast-forward your working tree` | autosave と comms.sh が同時に同じ worktree で git 操作 | 両方で同じ `.comms.lock` を flock |
+| 24 | r186 で `PCFSoftShadowMap has been removed` 警告 | r18x で削除 | `PCFShadowMap` + `light.shadow.radius` |
+| 25 | 統合スクショが白飛び/ローダーのまま写る | SwiftShader では読込+シェーダコンパイルに 15〜30 秒、ローダーのフェード途中を撮影 | `tools/probe.mjs` で `#loader` の class を監視してから撮影。見た目判断は実機で |
