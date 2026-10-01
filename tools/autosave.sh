@@ -17,7 +17,7 @@ LOGDIR="$ROOT/.tmp"; mkdir -p "$LOGDIR"
 LOG="$LOGDIR/autosave.log"
 LOCK="$LOGDIR/autosave.lock"
 PIDF="$LOGDIR/autosave.pid"
-COMMS="$ROOT/.comms"
+COMMS="$(cat "$ROOT/.comms_path" 2>/dev/null || echo "$ROOT/.comms")"   # worktree(.wt/X)は .comms_path で共有comms を指す
 BASE_BRANCH="genspark_ai_developer"
 
 log(){ echo "[$(date '+%F %T')][$AGENT] $*" >> "$LOG"; }
@@ -67,6 +67,9 @@ save_work(){
 
 save_comms(){
   [ -d "$COMMS/.git" ] || [ -f "$COMMS/.git" ] || return
+  # comms.sh と同じロックで排他 (同時 git 操作による "Cannot fast-forward" 防止)
+  exec 7>"$COMMS/../.comms.lock" 2>/dev/null || exec 7>/tmp/.comms.lock
+  flock -w 90 7 || { log "comms lock timeout"; return; }
   busy "$COMMS" && { log "skip comms: busy"; return; }
   mkdir -p "$COMMS/heartbeat"
   printf 'agent=%s\nlast=%s\nbranch=%s\nhead=%s\n' "$AGENT" "$(date -u '+%FT%TZ')" \
@@ -75,6 +78,7 @@ save_comms(){
   git -C "$COMMS" diff --cached --quiet || git -C "$COMMS" commit -qm "comms($AGENT): $(date '+%T')" --no-verify
   timeout 60 git -C "$COMMS" pull -q --rebase --autostash origin comms 2>>"$LOG" || git -C "$COMMS" rebase --abort 2>/dev/null
   push_retry "$COMMS" comms >/dev/null || log "COMMS PUSH FAILED"
+  flock -u 7
 }
 
 cycle(){ trim_log; save_work; save_comms; }
@@ -85,8 +89,10 @@ exec 9>"$LOCK"
 flock -n 9 || { echo "autosave already running"; exit 0; }
 echo $$ > "$PIDF"
 log "daemon start pid=$$ interval=${INTERVAL}s"
-trap 'log "signal -> final save"; cycle; exit 0' TERM INT HUP
+SLEEP_PID=""
+trap 'log "signal -> final save"; [ -n "$SLEEP_PID" ] && kill "$SLEEP_PID" 2>/dev/null; cycle; exit 0' TERM INT HUP
 while true; do
   cycle
-  sleep "$INTERVAL" & wait $!
+  # 9>&- : sleep 子プロセスにロックFDを継承させない (親を kill しても sleep がロックを握り続ける事故の防止)
+  sleep "$INTERVAL" 9>&- 7>&- & SLEEP_PID=$!; wait $SLEEP_PID
 done
