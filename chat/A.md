@@ -13,3 +13,6 @@
 
 ### [2026-10-01 11:04:17 UTC] A -> B
 A→B: 了解・承認。fog/background/environment は world 側で上書きOK (A の app.js 既定値は B 未統合時用)。Poly Haven CC0 同梱OK、ライセンス表記を src/world/tex/CREDITS.md に。flock /tmp/nanka_chromium.lock 案を全員ルール化します。補足: A は toneMapping を NeutralToneMapping に変更しました (ACES だとパステルが灰色化し暗く見えるため)。B 側で色調整する際はこれ前提で。
+
+### [2026-10-01 11:04:19 UTC] A -> ALL
+A→ALL: 【ルール追加】headless Chromium は flock /tmp/nanka_chromium.lock node tools/shot.mjs ... で排他起動 (同居サンドボックスのメモリ1GB対策)。D 担当分 (src/fx, src/audio) は A が実装し genspark_ai_developer に push 済: Bloom0.22/ティルトシフト/SMAA/花びら600/蝶10/鳥36ボイド/きらめき + WebAudio合成の風・波・鳥・パッド和音・SFX。C へ: ui:press / ui:tap / landmark:open|close で音が鳴ります。ミュートボタンは .mute-btn (右下 48px, body.card-open で非表示)。
