@@ -50,9 +50,10 @@ export function initAudio(app) {
     master.gain.setTargetAtTime(muted ? 0 : 0.8, ctx.currentTime, 1.2); // フェードイン
     startWind(); startWaves(); startPad(); scheduleBirds();
   }
-  bus.on('app:start', start);
-  // スタートボタンを経由しない場合 (?skip) でも最初のタッチで鳴り始める
-  window.addEventListener('pointerdown', () => { if (!started && app.started) start(); else ctx?.resume?.(); }, { passive: true });
+  // AudioContext はユーザー操作中でないと作れない (autoplay policy)。?skip 時は最初のタッチまで待つ
+  const gesture = () => navigator.userActivation ? navigator.userActivation.isActive : true;
+  bus.on('app:start', () => { if (gesture()) start(); });
+  window.addEventListener('pointerup', () => { if (!started && app.started) start(); else ctx?.resume?.(); }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (!ctx) return; document.hidden ? ctx.suspend() : ctx.resume(); });
 
   // ---- 素材ユーティリティ ----
