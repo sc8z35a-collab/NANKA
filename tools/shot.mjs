@@ -1,4 +1,5 @@
 // 横画面スマホ(既定 915x412 CSS px @DPR 2.625 Pixel系, touch)でスクショ + console エラー収集
+// ※ 同一サンドボックス複数エージェント時は `flock /tmp/nanka_chromium.lock node tools/shot.mjs ...` で排他
 // 使い方: node tools/shot.mjs <url> <out.png> [waitMs=6000] [WxH] [--tap x,y ...]
 // 依存: .tmp/npm/node_modules/playwright-core + `npx -y playwright install chromium-headless-shell`
 import { createRequire } from 'module';
@@ -6,7 +7,10 @@ import path from 'path'; import { fileURLToPath } from 'url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(path.join(root, '.tmp/npm/package.json'));
 const { chromium } = require('playwright-core');
-const [url, out = '.tmp/shot.png', waitMs = '6000', wh = '915x412', ...rest] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const flagAt = argv.findIndex((a) => a.startsWith('--')); // 位置引数と --tap を分離
+const pos = flagAt < 0 ? argv : argv.slice(0, flagAt), rest = flagAt < 0 ? [] : argv.slice(flagAt);
+const [url, out = '.tmp/shot.png', waitMs = '6000', wh = '915x412'] = pos;
 const [W, H] = wh.split('x').map(Number);
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: Number(process.env.DPR || 1.5), isMobile: true, hasTouch: true,
