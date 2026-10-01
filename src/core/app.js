@@ -16,7 +16,7 @@ export function createApp(canvas) {
   renderer.toneMapping = THREE.NeutralToneMapping; // ACES は彩度が落ち灰色っぽくなるため Neutral (明るいパステル維持)
   renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // r186: PCFSoftShadowMap は削除済み (PCF + shadow.radius でソフト化)
   renderer.setClearColor('#CFEBFF', 1);
 
   const scene = new THREE.Scene();
