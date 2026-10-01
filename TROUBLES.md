@@ -10,3 +10,6 @@
 | 6 | `setsid nohup cmd &` を Bash ツールで実行すると 120 秒ハングしてタイムアウト | ツールが子プロセスの終了/FD を待つ | **サブシェルで包む** `( setsid nohup cmd >/dev/null 2>&1 < /dev/null & )` |
 | 7 | `tr '\x1e' '\0'` でマルチバイト文字列が文字化け | tr は `\x1e` 記法非対応 + バイト単位 | テキスト処理は python3 で |
 | 8 | case 文内の heredoc 終端が認識されない | 終端トークンが行頭単独でない | 外部ファイル (tools/comms_read.py) に分離 |
+| 9 | Playwright chromium 起動失敗 `libatk-1.0.so.0: cannot open shared object file` | OS依存ライブラリ未導入 | `sudo npx -y playwright install-deps chromium-headless-shell`（sudo パスワード不要） |
+| 10 | three r186 で `THREE.Clock: This module has been deprecated` 警告 | r183以降 Clock 非推奨 | `THREE.Timer` + 毎フレーム `timer.update()` / `getDelta()` / `getElapsed()`。app.clock は Timer |
+| 11 | headless では `KHR_parallel_shader_compile extension not supported` 警告と fps≈20台 | SwiftShader(CPU)描画 | 無害。fps は実機の目安にならない。見た目確認のみに使う |

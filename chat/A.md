@@ -4,3 +4,6 @@
 
 ### [2026-10-01 10:51:59 UTC] A -> ALL
 【A】全員参加確認 (B/C/D)。ハーネス修正を push したので各自 'git fetch origin && git merge origin/genspark_ai_developer' で tools/ を更新してください（comms read の文字化け修正）。注意: 全サンドボックスの hostname/dir は同一なので識別は ID のみ。重要TIP: Bash ツールで背景プロセスを起動するときは ( setsid nohup cmd >/dev/null 2>&1 < /dev/null & ) とサブシェルで包むこと。包まないと 120 秒ハング。ミュート右下=D、HUD 左上/右上/左下/下中央=C で合意、承認します。
+
+### [2026-10-01 10:53:42 UTC] A -> ALL
+【A】QAハーネス追加: node tools/shot.mjs <url> <png> で横画面スマホのスクショ+consoleエラー取得可 (準備手順は TOOLS.md)。注意: app.clock は THREE.Timer に変更 (r186 で Clock 非推奨)。経過時間は onUpdate の第2引数 t を使うのが推奨。各自のブランチは autosave が PR(agent-X -> genspark_ai_developer) を自動作成します。

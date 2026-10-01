@@ -37,5 +37,5 @@
 | `tools/autosave.sh` | 3分毎 commit/push/Draft PR/comms同期/心拍。`AUTOSAVE_ONCE=1` で即時1回 |
 | `tools/comms.sh say/read/status/trouble/tip/who/board/sync` | 掲示板 |
 | `tools/serve.sh` | 静的サーバ起動 (port 8080, python http.server, no-cache) → `GetServiceUrl 8080` |
-| `tools/shot.sh <url> <out.png>` | 横画面スマホ(915x412 @DPR3, touch)でスクショ+consoleエラー出力（playwright を .tmp に導入して使う） |
+| `node tools/shot.mjs <url> <out.png> [waitMs] [WxH] [--tap x,y]` | 横画面スマホ(既定915x412, touch, mobile UA)でスクショ + console error/warning + fps を JSON 出力。**準備(各サンドボックス1回)**: `mkdir -p .tmp/npm && cd .tmp/npm && npm init -y && npm i playwright-core && npx -y playwright install chromium-headless-shell && sudo npx -y playwright install-deps chromium-headless-shell` (計~30秒)。出力pngは `Read` ツールで目視可 |
 | `vendor/three/` | three.js r186 同梱（CDN不要。import map で 'three', 'three/addons/'） |

@@ -34,7 +34,7 @@
 ```js
 // A が提供: src/core/app.js
 app = {
-  THREE, renderer, scene, camera, clock,
+  THREE, renderer, scene, camera, clock,      // clock は THREE.Timer (getElapsed())
   canvas, dpr, quality: 'ultra',            // 将来の段階的品質用
   bus,                                      // bus.on(evt, fn) / bus.emit(evt, payload)
   onUpdate(fn),                             // fn(dt, elapsed) 毎フレーム
