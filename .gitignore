@@ -1,0 +1,4 @@
+node_modules/
+.agent_id
+*.log
+.tmp/
