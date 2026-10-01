@@ -111,7 +111,7 @@ export function initUI(app, world) {
 
   // 写真を先読み (カードを開いた瞬間に白くならないように)
   const preload = () => Object.values(CONTENT).forEach((c) => c.photos.forEach((p) => { const i = new Image(); i.decoding = 'async'; i.src = p.src; }));
-  (window.requestIdleCallback || setTimeout)(preload, 1200);
+  setTimeout(preload, 1200);
 
   let galIdx = 0, galTimer = 0, galN = 0;
   function setGallery(i) {
