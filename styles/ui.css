@@ -206,3 +206,6 @@ body.card-open .nk-toast{left:31vw}
 /* 縦向き時は UI を出さない (A の回転ゲートが前面) */
 @media (orientation: portrait){ .nk-ui{display:none} }
 @media (prefers-reduced-motion: reduce){ .nk-ui *{animation:none!important} }
+
+/* レイヤ順: ピン(1) < HUD(3) < ミニマップ(4) < カード(6) */
+.nk-pins{z-index:1;isolation:isolate} .nk-hud{z-index:3} .nk-minimap{z-index:4} .nk-card{z-index:6} .nk-ripple{z-index:2}

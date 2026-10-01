@@ -86,7 +86,7 @@ export function createCameraRig(app, world, opts = {}) {
     } else if (ptrs.size >= 2 && pinch) {
       const [a, b] = [...ptrs.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
-      goal.dist = clamp(pinch.dist0 * (pinch.d0 / d), cfg.minDist, cfg.maxDist);
+      goal.dist = clamp(pinch.dist0 * (pinch.d0 / d), Math.min(cfg.minDist, pinch.dist0), cfg.maxDist);
       // 2本指の中点移動 = パン (地面と平行に)
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const pdx = mx - pinch.mx, pdy = my - pinch.my; pinch.mx = mx; pinch.my = my;
@@ -100,6 +100,7 @@ export function createCameraRig(app, world, opts = {}) {
   function onUp(e) {
     const p = ptrs.get(e.pointerId); if (!p) return;
     ptrs.delete(e.pointerId);
+    touch(); // 先に呼ぶ (タップで始まったフライトを消さないため)
     const dt = performance.now() - p.t0;
     if (ptrs.size === 0) {
       // 指を離す直前に止まっていたら慣性を出さない
@@ -110,7 +111,6 @@ export function createCameraRig(app, world, opts = {}) {
       pinch = null; vel.theta = vel.phi = 0;
       const q = [...ptrs.values()][0]; q.x0 = q.x; q.y0 = q.y; dragMoved = 99; // ピンチ後のタップ誤爆防止
     }
-    touch();
   }
   // PC 確認用ホイール
   function onWheel(e) { e.preventDefault(); goal.dist = clamp(goal.dist * Math.exp(e.deltaY * 0.0012), cfg.minDist, cfg.maxDist); touch(); }
@@ -132,7 +132,7 @@ export function createCameraRig(app, world, opts = {}) {
   function flyTo({ target, dist, phi, theta, dur, shift = 0, locked = false }, onDone) {
     const to = {
       target: target ? target.clone() : goal.target.clone(),
-      dist: clamp(dist ?? goal.dist, cfg.minDist, cfg.maxDist),
+      dist: clamp(dist ?? goal.dist, cfg.minDist * 0.5, cfg.maxDist),
       phi: clamp(phi ?? goal.phi, cfg.minPhi, cfg.maxPhi),
       theta: theta ?? goal.theta,
     };
@@ -150,11 +150,11 @@ export function createCameraRig(app, world, opts = {}) {
   function focusLandmark(lm, { shift = 0.19 } = {}) {
     const r = lm.radius || 6;
     const p = lm.position.clone();
-    const tgt = p.clone(); tgt.y += r * 0.55;
+    const tgt = p.clone(); if (!lm.focusCenter) tgt.y += r * 0.55;
     // 外側(島の中心から外向き)から見るか、現在方位を維持するか: 現在方位に近い方を採用しつつ外向きへ寄せる
     const out = Math.atan2(p.x, p.z);
     const th = Math.hypot(p.x, p.z) > R * 0.15 ? cur.theta + wrap(out - cur.theta) * 0.55 : cur.theta;
-    flyTo({ target: tgt, dist: clamp(r * 3.4, cfg.minDist, R * 0.9), phi: 1.08, theta: th, shift });
+    flyTo({ target: tgt, dist: clamp(r * 3.6, cfg.minDist * 0.6, R * 0.9), phi: 1.1, theta: th, shift });
   }
   function goHome() { flyTo({ ...home, target: home.target, shift: 0 }); }
 

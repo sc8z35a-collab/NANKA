@@ -24,6 +24,30 @@ export function initUI(app, world) {
   // ランドマーク (B 未統合/欠けがあっても動くように)
   let landmarks = (world.landmarks || []).filter((l) => l && l.position);
   if (!landmarks.length && app.params.has('mock')) landmarks = mockLandmarks(app, world);
+  // アンカー: B の position 規約に依存せず、実体のバウンディングボックスから「見た目の中心/てっぺん/大きさ」を出す
+  //  object のワールド位置からのオフセットとして保持 → 気球のように動くものにも毎フレーム追従
+  const _bx = new THREE.Box3(), _wp = new THREE.Vector3(), _sz = new THREE.Vector3();
+  for (const l of landmarks) {
+    l._ui = { center: new THREE.Vector3(0, (l.radius || 6) * 0.5, 0), top: new THREE.Vector3(0, (l.radius || 6) * 1.25, 0), size: l.radius || 6, base: l.position.clone() };
+    if (!l.object) continue;
+    try {
+      l.object.updateWorldMatrix(true, true); _bx.setFromObject(l.object, true);
+      if (_bx.isEmpty()) continue;
+      l.object.getWorldPosition(_wp);
+      const c = _bx.getCenter(new THREE.Vector3()); _bx.getSize(_sz);
+      const size = Math.max(2, Math.min(_sz.length() * 0.5, (l.radius || 6) * 2.5));
+      l._ui.center.copy(c).sub(_wp);
+      l._ui.top.set(c.x, _bx.max.y, c.z).sub(_wp);
+      l._ui.size = size;
+      l._ui.base.set(c.x, l.position.y, c.z);
+      l._ui.floating = _bx.min.y - (Number.isFinite(world.getHeightAt?.(c.x, c.z)) ? world.getHeightAt(c.x, c.z) : _bx.min.y) > size * 0.6;
+    } catch (e) { console.warn('[ui] anchor', l.id, e); }
+  }
+  const _ow = new THREE.Vector3();
+  const anchor = (l, which, out) => { // which: 'center' | 'top'
+    if (l.object) l.object.getWorldPosition(_ow); else _ow.copy(l.position);
+    return out.copy(_ow).add(l._ui[which]);
+  };
   const byId = new Map(landmarks.map((l) => [l.id, l]));
   const ids = ORDER.filter((id) => byId.has(id)).concat(landmarks.map((l) => l.id).filter((id) => !ORDER.includes(id)));
   const info = (id) => CONTENT[id] || { name: byId.get(id)?.name || id, kana: '', en: '', color: '#8FB8FF', tint: '#E8F6FF', icon: 'star', lead: '', body: [], facts: [], trivia: '', photos: [] };
@@ -153,8 +177,8 @@ export function initUI(app, world) {
     card.classList.add('open'); card.setAttribute('aria-hidden', 'false');
     document.body.classList.add('card-open');
     chips.querySelectorAll('.nk-chip').forEach((b) => b.classList.toggle('on', b.dataset.id === id));
-    rig.focusLandmark(lm, { shift: shiftForCard() });
-    halo.show(lm, info(id).color);
+    rig.focusLandmark({ position: anchor(lm, 'center', new THREE.Vector3()), radius: lm._ui.size, focusCenter: true }, { shift: shiftForCard() });
+    if (!lm._ui.floating) halo.show({ position: lm._ui.base, radius: lm._ui.size * 0.8 }, info(id).color); else halo.hide();
     renderStamps(first ? id : null);
     hideHint();
     bus.emit('camera:focus', { id });
@@ -247,21 +271,21 @@ export function initUI(app, world) {
     // 1フレーム1ピンだけ遮蔽レイ (負荷分散)
     if (pinArr.length && occluders.length && frame % 2 === 0) {
       const [, p] = pinArr[occCursor++ % pinArr.length];
-      top.copy(p.lm.position); top.y += (p.lm.radius || 6) * 1.25;
+      anchor(p.lm, 'top', top);
       const dist = camera.position.distanceTo(top);
-      occRay.set(camera.position, top.clone().sub(camera.position).normalize()); occRay.far = dist - (p.lm.radius || 6) * 0.9;
+      occRay.set(camera.position, top.clone().sub(camera.position).normalize()); occRay.far = dist - p.lm._ui.size * 0.6;
       const lmObj = p.lm.object;
       const hs = occRay.far > 0 ? occRay.intersectObjects(occluders, false) : [];
       p.occT = hs.some((hh) => !isChildOf(hh.object, lmObj)) ? 1 : 0;
     }
     for (const [id, p] of pinArr) {
-      const lm = p.lm, r = lm.radius || 6;
-      top.copy(lm.position); top.y += r * 1.25 + 1.2;
+      const lm = p.lm, r = lm._ui.size;
+      anchor(lm, 'top', top); top.y += 1.2 + r * 0.1;
       v.copy(top).project(camera);
       const behind = v.z > 1 || top.clone().sub(camera.position).dot(camDir) < 0;
       const x = (v.x * 0.5 + 0.5) * W, y = (-v.y * 0.5 + 0.5) * H;
       // ランドマーク中心の投影 (タップ許容半径用)
-      const c = lm.position.clone(); c.y += r * 0.5; const cv = c.clone().project(camera);
+      const c = anchor(lm, 'center', new THREE.Vector3()); const cv = c.clone().project(camera);
       p.ax = (cv.x * 0.5 + 0.5) * W; p.ay = (-cv.y * 0.5 + 0.5) * H;
       const d = camera.position.distanceTo(c);
       p.screenR = (r / d) * (H / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2))) * 0.9;
