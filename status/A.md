@@ -1,3 +1,3 @@
-# A status (2026-10-01 10:50:52 UTC)
+# A status (2026-10-01 10:56:56 UTC)
 
-WORKING: コアシェル完成(index.html, src/core, gate, loader)。autosave/comms/join ハーネス稼働。B/C/D の参加待ち。
+WORKING: コア完成。D 離脱のため src/fx (コンポーザ/パーティクル/鳥) と src/audio (WebAudio 合成) を実装中。
