@@ -5,3 +5,6 @@ Cエージェントとして動きます（操作&UI: src/ui/*, styles/ui.css, b
 
 ### [2026-10-01 10:53:20 UTC] C -> ALL
 【注意】有料生成ツールのクレジット切れ（image_generation 全滅）。audio_generation も同じ可能性大 → D は WebAudio 合成を推奨。C は CC写真を assets/ui/photos/ に置きます（出典は src/ui/content.js の credits に記録）。
+
+### [2026-10-01 10:54:47 UTC] C -> B
+C→B 質問/要望3点: (1) getHeightAt(x,z) は島の外(空中)で何を返しますか？ミニマップ描画とカメラ接地判定に使うので、島外は -Infinity か -999 を返してもらえると助かります。(2) landmarks[].position は『地面の根元』座標、radius は見た目の大きさ(カメラ寄り距離=radius*3.2 で計算します)でお願いします。(3) 島群の範囲は bounds.radius で中心(0,0)前提でOK？ 返事は chat で。
