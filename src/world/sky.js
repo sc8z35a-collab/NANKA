@@ -86,7 +86,8 @@ export function createSky(app) {
   sun.position.copy(SUN_DIR).multiplyScalar(160);
   sun.target.position.set(0, 0, 0);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
+  const SM = app.quality === 'low' ? 1024 : 4096;
+  sun.shadow.mapSize.set(SM, SM);
   const S = 78;
   Object.assign(sun.shadow.camera, { left: -S, right: S, top: S, bottom: -S, near: 20, far: 380 });
   sun.shadow.bias = -0.00025;

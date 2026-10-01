@@ -229,9 +229,9 @@ function waterMaterial() {
   return m;
 }
 
-function buildWater() {
+function buildWater(Q = 1) {
   // 島上面の格子を再サンプリングして、川/池の内側(+余白)の三角形だけ残す
-  const NRw = 260, NTw = 900;
+  const NRw = Math.round(260 * Q), NTw = Math.round(900 * Q);
   const pos = [], shore = [], flow = [], idx = [], keep = [];
   const R = (th) => rimRadius(th);
   for (let i = 0; i <= NRw; i++) {
@@ -267,9 +267,10 @@ function buildWater() {
 }
 
 export function createTerrain(app) {
+  const Q = app.quality === 'low' ? 0.35 : 1;
   const group = new THREE.Group(); group.name = 'terrain';
   const gm = groundMaterial(), rm = rockMaterial();
-  const main = buildIsland({ rimFn: rimRadius, heightFn: (x, z) => mainHeight(x, z), colorFn: mainColor, depth: 66, NT: 720, NR: 230, seed: 3, underRows: 110 });
+  const main = buildIsland({ rimFn: rimRadius, heightFn: (x, z) => mainHeight(x, z), colorFn: mainColor, depth: 66, NT: Math.round(720 * Q), NR: Math.round(230 * Q), seed: 3, underRows: Math.round(110 * Q) });
   const topMesh = new THREE.Mesh(main.top, gm); topMesh.receiveShadow = true; topMesh.castShadow = true; topMesh.name = 'mainTop';
   const underMesh = new THREE.Mesh(main.under, rm); underMesh.receiveShadow = true; underMesh.castShadow = true; underMesh.name = 'mainUnder';
   group.add(topMesh, underMesh);
@@ -278,7 +279,7 @@ export function createTerrain(app) {
   for (const isl of ISLETS) {
     const b = buildIsland({
       cx: isl.c[0], cz: isl.c[2], rimFn: (th) => isletRim(isl, th), heightFn: (x, z) => isletHeight(isl, x, z),
-      colorFn: isletColor(isl), depth: isl.depth, NT: Math.round(160 + isl.R * 10), NR: Math.round(30 + isl.R * 2.2), seed: isl.seed, underRows: 60,
+      colorFn: isletColor(isl), depth: isl.depth, NT: Math.round((160 + isl.R * 10) * Q), NR: Math.round((30 + isl.R * 2.2) * Q), seed: isl.seed, underRows: Math.round(60 * Q),
     });
     const t = new THREE.Mesh(b.top, gm), u = new THREE.Mesh(b.under, rm);
     t.receiveShadow = u.receiveShadow = true; t.castShadow = u.castShadow = true;
@@ -287,7 +288,7 @@ export function createTerrain(app) {
     group.add(g); islets.push(g);
   }
 
-  const water = buildWater();
+  const water = buildWater(Q);
   group.add(water);
 
   app.onUpdate((dt, t) => {
